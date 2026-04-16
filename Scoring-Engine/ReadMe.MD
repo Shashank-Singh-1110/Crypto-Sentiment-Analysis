@@ -1,36 +1,4 @@
-🔹 1. VADER Sentiment Analysis
-We use VADER (Valence Aware Dictionary and sEntiment Reasoner) to compute rule-based sentiment scores.
-Key Outputs:
-positive
-neutral
-negative
-compound (range: [-1, +1])
-Compound Score Formula:
-compound
-=
-x
-x
-2
-+
-15
-compound= 
-x 
-2
- +15
-​	
- 
-x
-​	
- 
-Where:
-x = aggregated sentiment score from words and modifiers
-Enhancements:
-Custom crypto-specific lexicon (e.g., moon, pump, rug, rekt) to improve domain accuracy
-Accounts for:
-Punctuation (e.g., !)
-Intensifiers (e.g., very, hard)
-Capitalization
-🔹 2. FinBERT Sentiment Analysis
+2. FinBERT Sentiment Analysis
 We use FinBERT, a transformer-based model fine-tuned for financial sentiment.
 Outputs:
 positive probability
@@ -133,8 +101,3 @@ Helps identify relative sentiment strength
 Positive z-score → Bullish sentiment
 Negative z-score → Bearish sentiment
 Near zero → Neutral sentiment
-🔹 Key Design Insight
-Composite Score → Pure sentiment signal
-Weighted Score → Sentiment × Attention (impact)
-Z-score → Bias-corrected sentiment for comparison
-👉 Z-score is used for normalization and analysis, not for direct weighting.
