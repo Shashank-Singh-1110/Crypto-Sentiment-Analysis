@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoSentiment — Research Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#08080d;--s1:#10101a;--s2:#181825;--s3:#1e1e30;--border:#2a2a40;--text:#e4e4f0;--text2:#7878a0;--accent:#7c6ff7;--accent2:#9d93f8;--green:#34d399;--red:#f87171;--amber:#fbbf24;--cyan:#22d3ee;--pink:#f472b6}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* Layout */
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+@media(max-width:768px){.app{grid-template-columns:1fr}.sidebar{display:none}}
+
+/* Sidebar */
+.sidebar{background:var(--s1);border-right:1px solid var(--border);padding:24px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.logo{font-size:18px;font-weight:700;padding:8px 12px;margin-bottom:32px;background:linear-gradient(135deg,#e4e4f0 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:var(--text2);font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;margin-bottom:2px;border:1px solid transparent}
+.nav-item:hover{color:var(--text);background:var(--s2)}
+.nav-item.active{color:#fff;background:linear-gradient(135deg,var(--accent),#5b52cc);border-color:rgba(124,111,247,.3);box-shadow:0 2px 12px rgba(124,111,247,.15)}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.sidebar-footer{margin-top:auto;padding-top:16px;border-top:1px solid var(--border)}
+.refresh-btn{width:100%;padding:10px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-family:'DM Sans';font-size:13px;font-weight:600;border-radius:8px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.refresh-btn:hover{border-color:var(--accent);background:var(--s3)}
+.refresh-btn.running{opacity:.6;cursor:wait}
+.refresh-status{font-size:11px;color:var(--text2);margin-top:8px;text-align:center}
+
+/* Main content */
+.main{padding:24px 32px;max-width:1100px}
+@media(max-width:768px){.main{padding:16px}}
+.page{display:none;animation:pageIn .3s ease}
+.page.active{display:block}
+@keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* Page header */
+.page-header{margin-bottom:24px}
+.page-title{font-size:24px;font-weight:700;margin-bottom:4px}
+.page-desc{color:var(--text2);font-size:14px}
+
+/* Stats strip */
+.stats-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:24px}
+.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.stat-val{font-family:'JetBrains Mono';font-size:22px;font-weight:700;color:var(--accent2)}
+.stat-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+
+/* Card */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:14px}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.card-title{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.04em}
+.chart-box{position:relative;height:320px}
+.chart-sm{height:240px}
+
+/* Coin pills */
+.coin-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.pill{padding:6px 14px;border:1px solid var(--border);background:var(--s2);color:var(--text2);font-family:'JetBrains Mono';font-size:12px;font-weight:500;border-radius:20px;cursor:pointer;transition:all .15s}
+.pill:hover{border-color:var(--accent);color:var(--text)}
+.pill.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+/* Grid */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:900px){.grid-2{grid-template-columns:1fr}}
+
+/* Table */
+.tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--s2);padding:10px 12px;text-align:left;font-weight:600;color:var(--text2);text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+td{padding:9px 12px;border-top:1px solid var(--border);font-family:'JetBrains Mono';font-size:11px}
+tr:hover td{background:rgba(124,111,247,.03)}
+.c-pos{color:var(--green)}.c-neg{color:var(--red)}.c-neu{color:var(--text2)}
+.badge{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600}
+.b-yes{background:rgba(52,211,153,.12);color:var(--green)}.b-no{background:rgba(248,113,113,.1);color:var(--red)}
+
+/* Insight box */
+.insight-box{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:20px}
+.insight-input{display:flex;gap:10px;margin-bottom:16px}
+.insight-input input{flex:1;padding:10px 14px;background:var(--s1);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans';font-size:14px;outline:none;transition:border .2s}
+.insight-input input:focus{border-color:var(--accent)}
+.insight-input button{padding:10px 20px;background:var(--accent);border:none;color:#fff;font-family:'DM Sans';font-weight:600;font-size:13px;border-radius:8px;cursor:pointer;white-space:nowrap;transition:opacity .2s}
+.insight-input button:hover{opacity:.85}
+.insight-input button:disabled{opacity:.5;cursor:wait}
+.insight-response{font-size:14px;line-height:1.7;color:var(--text);white-space:pre-wrap}
+.insight-response.loading{color:var(--text2);font-style:italic}
+.coin-select{padding:10px 12px;background:var(--s1);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono';font-size:13px;outline:none}
+
+/* Method steps */
+.method-step{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+.method-step:last-child{border:none}
+.step-n{width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.step-t{font-weight:600;margin-bottom:3px;font-size:14px}
+.step-d{font-size:13px;color:var(--text2);line-height:1.5}
+
+/* Spinner */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--text2);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+<div class="logo">CryptoSentiment</div>
+<div class="nav-item active" data-page="overview"><span class="nav-icon">◉</span> Overview</div>
+<div class="nav-item" data-page="sentiment"><span class="nav-icon">📈</span> Sentiment</div>
+<div class="nav-item" data-page="research"><span class="nav-icon">🧪</span> Research</div>
+<div class="nav-item" data-page="explore"><span class="nav-icon">🔍</span> Explore</div>
+<div class="nav-item" data-page="insight"><span class="nav-icon">🤖</span> AI Insights</div>
+<div class="nav-item" data-page="methodology"><span class="nav-icon">📋</span> Methodology</div>
+
+<div class="sidebar-footer">
+<button class="refresh-btn" id="refreshBtn" onclick="triggerRefresh()">
+<span id="refreshIcon">↻</span> Refresh Data
+</button>
+<div class="refresh-status" id="refreshStatus">Click to re-run pipeline</div>
+</div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- PAGE: OVERVIEW -->
+<div class="page active" id="overview">
+<div class="page-header">
+<div class="page-title">Dashboard Overview</div>
+<div class="page-desc">Real-time crypto sentiment analysis from Reddit</div>
+</div>
+<div class="stats-strip" id="statsStrip"><div class="stat-card"><div class="stat-val"><span class="spinner"></span></div><div class="stat-label">Loading...</div></div></div>
+<div class="grid-2">
+<div class="card">
+<div class="card-title">Market Sentiment (All Coins)</div>
+<div class="chart-box chart-sm"><canvas id="overviewSentChart"></canvas></div>
+</div>
+<div class="card">
+<div class="card-title">Post Volume by Coin</div>
+<div class="chart-box chart-sm"><canvas id="overviewVolChart"></canvas></div>
+</div>
+</div>
+<div class="card">
+<div class="card-title">Average Sentiment by Coin</div>
+<div class="chart-box chart-sm"><canvas id="overviewCoinBar"></canvas></div>
+</div>
+</div>
+
+<!-- PAGE: SENTIMENT -->
+<div class="page" id="sentiment">
+<div class="page-header">
+<div class="page-title">Sentiment Trends</div>
+<div class="page-desc">Daily VADER, FinBERT, and Composite scores per coin</div>
+</div>
+<div class="coin-pills" id="sentCoins"></div>
+<div class="card">
+<div class="card-title">Sentiment Over Time</div>
+<div class="chart-box"><canvas id="sentChart"></canvas></div>
+</div>
+<div class="grid-2">
+<div class="card"><div class="card-title">Post Volume</div><div class="chart-box chart-sm"><canvas id="sentVolChart"></canvas></div></div>
+<div class="card"><div class="card-title">VADER − FinBERT Divergence</div><div class="chart-box chart-sm"><canvas id="sentDivChart"></canvas></div></div>
+</div>
+</div>
+
+<!-- PAGE: RESEARCH -->
+<div class="page" id="research">
+<div class="page-header">
+<div class="page-title">Research Results</div>
+<div class="page-desc">Ablation study, correlations, and statistical tests</div>
+</div>
+<div class="card">
+<div class="card-title">Ablation Study — Which Scoring Variant Works Best?</div>
+<div class="tbl-wrap"><table id="ablTbl"></table></div>
+</div>
+<div class="grid-2">
+<div class="card"><div class="card-title">Accuracy by Variant</div><div class="chart-box chart-sm"><canvas id="ablAccChart"></canvas></div></div>
+<div class="card"><div class="card-title">Lag-1 Correlation by Variant</div><div class="chart-box chart-sm"><canvas id="ablCorrChart"></canvas></div></div>
+</div>
+<div class="card" id="findingsCard">
+<div class="card-title">Key Findings</div>
+<div id="findings" style="font-size:14px;line-height:1.8;color:var(--text2)">Loading...</div>
+</div>
+</div>
+
+<!-- PAGE: EXPLORE -->
+<div class="page" id="explore">
+<div class="page-header">
+<div class="page-title">Topic & Entity Explorer</div>
+<div class="page-desc">BERTopic topics, emotion breakdown, and named entities</div>
+</div>
+<div class="coin-pills" id="emoCoins"></div>
+<div class="grid-2">
+<div class="card"><div class="card-title">Emotion Distribution</div><div class="chart-box chart-sm"><canvas id="emoChart"></canvas></div></div>
+<div class="card"><div class="card-title">Top Named Entities</div><div class="tbl-wrap" id="nerTable" style="max-height:280px;overflow-y:auto"></div></div>
+</div>
+<div class="card">
+<div class="card-title">Topic Trends (Top 10)</div>
+<div class="chart-box"><canvas id="topicChart"></canvas></div>
+</div>
+</div>
+
+<!-- PAGE: AI INSIGHTS -->
+<div class="page" id="insight">
+<div class="page-header">
+<div class="page-title">AI Research Insights</div>
+<div class="page-desc">Ask questions about the data — powered by Llama 3 via Ollama</div>
+</div>
+<div class="insight-box">
+<div style="display:flex;gap:10px;align-items:center;margin-bottom:16px">
+<select class="coin-select" id="insightCoin">
+<option value="BTC">BTC</option><option value="ETH">ETH</option><option value="SOL">SOL</option>
+<option value="DOGE">DOGE</option><option value="BNB">BNB</option><option value="MARKET">MARKET</option>
+</select>
+<div style="font-size:13px;color:var(--text2)">Select coin context for AI analysis</div>
+</div>
+<div class="insight-input">
+<input type="text" id="insightQuery" placeholder="e.g., What's the overall sentiment trend for BTC this week?" onkeydown="if(event.key==='Enter')askInsight()">
+<button onclick="askInsight()" id="insightBtn">Ask Llama 3</button>
+</div>
+<div class="insight-response" id="insightResponse">
+Ask a question about any coin's sentiment, price trends, or Reddit discussion patterns. The AI will analyze your data and provide research-grade observations.
+</div>
+</div>
+<div class="card" style="margin-top:14px">
+<div class="card-title">Quick Questions</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+<button class="pill" onclick="quickAsk('What is the overall sentiment trend? Is it improving or declining?')">Sentiment trend?</button>
+<button class="pill" onclick="quickAsk('Compare VADER and FinBERT scores. Where do they disagree most?')">VADER vs FinBERT?</button>
+<button class="pill" onclick="quickAsk('Are there any anomalies or sudden sentiment shifts in the data?')">Anomaly detection?</button>
+<button class="pill" onclick="quickAsk('What does the emotion distribution tell us about market confidence?')">Market emotions?</button>
+<button class="pill" onclick="quickAsk('Based on sentiment patterns, what direction might the market move?')">Market direction?</button>
+</div>
+</div>
+</div>
+
+<!-- PAGE: METHODOLOGY -->
+<div class="page" id="methodology">
+<div class="page-header">
+<div class="page-title">Methodology</div>
+<div class="page-desc">Research pipeline architecture and tools</div>
+</div>
+<div class="card">
+<div class="card-title">8-Module Pipeline</div>
+<div class="method-step"><div class="step-n">1</div><div><div class="step-t">Reddit Collection</div><div class="step-d">Arctic Shift API — 11 subreddits, 6 coins + MARKET. Checkpoint/resume, CSV export, gap detection.</div></div></div>
+<div class="method-step"><div class="step-n">2</div><div><div class="step-t">Price + Macro Data</div><div class="step-d">Binance REST API for OHLCV. yfinance for Oil, DXY, Gold, VIX, S&P 500. Alternative.me for Fear & Greed Index.</div></div></div>
+<div class="method-step"><div class="step-n">3</div><div><div class="step-t">NLP Preprocessing</div><div class="step-d">spaCy (parser disabled), 38 crypto slang terms, POS tagging, NER, TF-IDF per subreddit/coin.</div></div></div>
+<div class="method-step"><div class="step-n">4</div><div><div class="step-t">Sentiment Analysis</div><div class="step-d">VADER (52 crypto terms) + FinBERT (ProsusAI/finbert). Composite = 0.7×FinBERT + 0.3×VADER. Engagement weighting + z-score correction.</div></div></div>
+<div class="method-step"><div class="step-n">5</div><div><div class="step-t">Advanced NLP</div><div class="step-d">BERTopic for topic discovery. 7-class emotion detection. Enhanced NER with crypto entity dictionaries.</div></div></div>
+<div class="method-step"><div class="step-n">6</div><div><div class="step-t">Correlation Engine</div><div class="step-d">Lagged Pearson (0-3 days), Granger causality, binary classification, ablation study across 5 variants.</div></div></div>
+<div class="method-step"><div class="step-n">7</div><div><div class="step-t">Dashboard</div><div class="step-d">Flask backend + vanilla JS frontend. Chart.js visualizations. Real-time API calls to SQLite.</div></div></div>
+<div class="method-step"><div class="step-n">8</div><div><div class="step-t">AI Insight Engine</div><div class="step-d">Llama 3 via Ollama. Context-aware analysis using live sentiment, price, and emotion data from the database.</div></div></div>
+</div>
+<div class="card" style="margin-top:14px">
+<div class="card-title">Tech Stack</div>
+<p style="font-size:13px;color:var(--text2);line-height:1.8">Python · Flask · spaCy · HuggingFace Transformers · FinBERT · VADER · BERTopic · scikit-learn · SQLite · scipy · statsmodels · Llama 3 · Ollama · Chart.js · Vanilla JS</p>
+</div>
+</div>
+
+</main>
+</div>
+
+<script>
+const API  = 'http://localhost:5002';
+const COINS = ['BTC','ETH','SOL','DOGE','BNB','SHIB','MARKET'];
+const COIN_CLR = {BTC:'#f59e0b',ETH:'#7c6ff7',SOL:'#9945ff',DOGE:'#c3a634',SHIB:'#ff4500',BNB:'#f0b90b',MARKET:'#8888a0'};
+Chart.defaults.color = '#7878a0';
+Chart.defaults.borderColor = '#2a2a40';
+Chart.defaults.font.family = "'DM Sans',sans-serif";
+const charts = {};
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById(item.dataset.page).classList.add('active');
+  });
+});
+
+async function api(path) {
+  try {
+    const r = await fetch(API + path);
+    return await r.json();
+  } catch(e) {
+    console.error('API error:', path, e);
+    return null;
+  }
+}
+
+async function loadOverview() {
+  const stats = await api('/api/stats');
+  if (!stats) return;
+
+  document.getElementById('statsStrip').innerHTML = [
+    [stats.total_posts?.toLocaleString() || '0', 'Posts'],
+    [stats.days_covered || '0', 'Days'],
+    [stats.subreddits || '0', 'Subreddits'],
+    [Object.keys(stats.per_coin || {}).length, 'Coins'],
+    [stats.sentiment_scored?.toLocaleString() || '0', 'Scored'],
+    [stats.topics_discovered || '0', 'Topics'],
+  ].map(([v,l]) => `<div class="stat-card"><div class="stat-val">${v}</div><div class="stat-label">${l}</div></div>`).join('');
+
+  const mkt = await api('/api/sentiment/MARKET');
+  if (mkt && mkt.dates.length) {
+    if (charts.overviewSent) charts.overviewSent.destroy();
+    charts.overviewSent = new Chart(document.getElementById('overviewSentChart'), {
+      type: 'line', data: { labels: mkt.dates.map(d=>d.slice(5)),
+        datasets: [
+          {label:'Composite',data:mkt.composite,borderColor:'var(--amber)',tension:.3,pointRadius:2,borderWidth:2},
+          {label:'VADER',data:mkt.vader,borderColor:'var(--accent)',tension:.3,pointRadius:2,borderWidth:1.5,borderDash:[4,4]},
+        ]
+      }, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{usePointStyle:true,padding:12}}}}
+    });
+  }
+
+  const perCoin = stats.per_coin || {};
+  const coins = Object.keys(perCoin).sort((a,b) => perCoin[b] - perCoin[a]);
+  if (charts.overviewVol) charts.overviewVol.destroy();
+  charts.overviewVol = new Chart(document.getElementById('overviewVolChart'), {
+    type: 'doughnut', data: { labels: coins,
+      datasets: [{data: coins.map(c=>perCoin[c]), backgroundColor: coins.map(c=>COIN_CLR[c]||'#555'), borderWidth:0}]
+    }, options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{usePointStyle:true,padding:8,font:{size:11}}}}}
+  });
+
+  const avgData = [];
+  for (const c of ['BTC','ETH','SOL','DOGE','BNB','MARKET']) {
+    const d = await api('/api/sentiment/' + c);
+    if (d && d.composite.length) {
+      avgData.push({coin:c, avg: d.composite.reduce((a,b)=>a+b,0)/d.composite.length});
+    }
+  }
+  if (charts.overviewCoin) charts.overviewCoin.destroy();
+  charts.overviewCoin = new Chart(document.getElementById('overviewCoinBar'), {
+    type:'bar', data:{labels:avgData.map(d=>d.coin),
+      datasets:[{label:'Avg Composite',data:avgData.map(d=>+d.avg.toFixed(4)),
+        backgroundColor:avgData.map(d=>d.avg>0?'rgba(52,211,153,.6)':'rgba(248,113,113,.6)'),borderRadius:4}]
+    },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{title:{display:true,text:'Score'}}}}
+  });
+}
+
+let sentCoin = 'BTC';
+function buildSentCoins() {
+  const el = document.getElementById('sentCoins');
+  ['BTC','ETH','SOL','DOGE','BNB','MARKET'].forEach(c => {
+    const b = document.createElement('div');
+    b.className = 'pill' + (c===sentCoin?' active':'');
+    b.textContent = c;
+    b.onclick = () => { sentCoin=c; el.querySelectorAll('.pill').forEach(p=>p.classList.remove('active')); b.classList.add('active'); loadSentiment(); };
+    el.appendChild(b);
+  });
+}
+async function loadSentiment() {
+  const d = await api('/api/sentiment/' + sentCoin);
+  if (!d || !d.dates.length) return;
+  const labels = d.dates.map(x=>x.slice(5));
+
+  if(charts.sent) charts.sent.destroy();
+  charts.sent = new Chart(document.getElementById('sentChart'),{type:'line',data:{labels,datasets:[
+    {label:'VADER',data:d.vader,borderColor:'#7c6ff7',tension:.3,pointRadius:2,borderWidth:2},
+    {label:'FinBERT',data:d.finbert,borderColor:'#34d399',tension:.3,pointRadius:2,borderWidth:2},
+    {label:'Composite',data:d.composite,borderColor:'#fbbf24',tension:.3,pointRadius:3,borderWidth:2.5},
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{usePointStyle:true,padding:14}},tooltip:{mode:'index',intersect:false}},scales:{y:{title:{display:true,text:'Score'}}}}});
+
+  if(charts.sentVol) charts.sentVol.destroy();
+  charts.sentVol = new Chart(document.getElementById('sentVolChart'),{type:'bar',data:{labels,datasets:[{data:d.posts,backgroundColor:(COIN_CLR[sentCoin]||'#666')+'80',borderColor:COIN_CLR[sentCoin],borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+
+  if(charts.sentDiv) charts.sentDiv.destroy();
+  const div = d.vader.map((v,i)=>+(v-(d.finbert[i]||0)).toFixed(4));
+  charts.sentDiv = new Chart(document.getElementById('sentDivChart'),{type:'bar',data:{labels,datasets:[{data:div,backgroundColor:div.map(v=>v>0?'rgba(124,111,247,.6)':'rgba(248,113,113,.6)'),borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+}
+buildSentCoins();
+
+async function loadResearch() {
+  const d = await api('/api/ablation');
+  if (!d || !d.data || !d.data.length) {
+    document.getElementById('findings').innerHTML = 'Run <code>python modules/correlation_engine.py</code> first.';
+    return;
+  }
+
+  const abl = d.data;
+  let html = '<thead><tr><th>Coin</th><th>Variant</th><th>Lag-1 r</th><th>p-value</th><th>Accuracy</th><th>F1</th><th>Beats?</th></tr></thead><tbody>';
+  abl.forEach(a => {
+    const r = a.lag1_correlation ?? 0, p = a.lag1_p_value ?? 1, acc = a.accuracy ?? 0, f1 = a.f1_score ?? 0;
+    const rc = r>0?'c-pos':r<0?'c-neg':'c-neu';
+    const sig = p<0.05?`<b>${p.toFixed(4)}</b>`:p.toFixed(4);
+    const beats = a.beats_baseline;
+    html+=`<tr><td>${a.coin}</td><td>${a.variant}</td><td class="${rc}">${r.toFixed(4)}</td><td>${sig}</td><td>${acc.toFixed(3)}</td><td>${f1.toFixed(3)}</td><td><span class="badge ${beats?'b-yes':'b-no'}">${beats?'YES':'NO'}</span></td></tr>`;
+  });
+  html+='</tbody>';
+  document.getElementById('ablTbl').innerHTML = html;
+  const variants = [...new Set(abl.map(a=>a.variant))];
+  const coins = [...new Set(abl.map(a=>a.coin))];
+
+  if(charts.ablAcc) charts.ablAcc.destroy();
+  charts.ablAcc = new Chart(document.getElementById('ablAccChart'),{type:'bar',data:{labels:variants,datasets:coins.map(c=>({label:c,data:variants.map(v=>{const row=abl.find(a=>a.coin===c&&a.variant===v);return row?.accuracy||0}),backgroundColor:COIN_CLR[c]||'#555',borderRadius:2}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{usePointStyle:true,padding:10,font:{size:10}}}},scales:{y:{beginAtZero:true,max:1},x:{ticks:{maxRotation:45,font:{size:10}}}}}});
+
+  if(charts.ablCorr) charts.ablCorr.destroy();
+  charts.ablCorr = new Chart(document.getElementById('ablCorrChart'),{type:'bar',data:{labels:variants,datasets:coins.map(c=>({label:c,data:variants.map(v=>{const row=abl.find(a=>a.coin===c&&a.variant===v);return row?.lag1_correlation||0}),backgroundColor:COIN_CLR[c]||'#555',borderRadius:2}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{usePointStyle:true,padding:10,font:{size:10}}}},scales:{x:{ticks:{maxRotation:45,font:{size:10}}}}}});
+
+  const sig = abl.filter(a=>(a.lag1_p_value||1)<0.1);
+  const beaters = abl.filter(a=>a.beats_baseline);
+  let f = `<p>With ${abl[0]?.coin ? coins.length : 0} coins tested across 5 scoring variants:</p><ul style="padding-left:18px;margin-top:8px">`;
+  f += `<li><b>${beaters.length}</b> of ${abl.length} variants beat the baseline classifier</li>`;
+  f += `<li><b>${sig.length}</b> correlations reached marginal significance (p < 0.1)</li>`;
+  if(sig.length) sig.forEach(s=>f+=`<li>${s.coin} ${s.variant}: r=${(s.lag1_correlation||0).toFixed(3)}, p=${(s.lag1_p_value||0).toFixed(4)}</li>`);
+  f += `<li>Limited data (20 days) constrains statistical power. Results will strengthen with 180-day dataset.</li></ul>`;
+  document.getElementById('findings').innerHTML = f;
+}
+
+let emoCoin = 'BTC';
+function buildEmoCoins() {
+  const el = document.getElementById('emoCoins');
+  ['BTC','ETH','SOL','DOGE','MARKET'].forEach(c => {
+    const b = document.createElement('div');
+    b.className = 'pill' + (c===emoCoin?' active':'');
+    b.textContent = c;
+    b.onclick = () => { emoCoin=c; el.querySelectorAll('.pill').forEach(p=>p.classList.remove('active')); b.classList.add('active'); loadEmotions(); };
+    el.appendChild(b);
+  });
+}
+async function loadEmotions() {
+  const d = await api('/api/emotions/' + emoCoin);
+  if (!d) return;
+  const dist = d.distribution || {};
+  const labels = Object.keys(dist);
+  const values = Object.values(dist);
+  const emoColors = {anger:'#ef4444',disgust:'#a855f7',fear:'#f59e0b',joy:'#22c55e',neutral:'#64748b',sadness:'#3b82f6',surprise:'#ec4899'};
+
+  if(charts.emo) charts.emo.destroy();
+  charts.emo = new Chart(document.getElementById('emoChart'),{type:'doughnut',data:{labels,datasets:[{data:values,backgroundColor:labels.map(l=>emoColors[l]||'#555'),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{usePointStyle:true,padding:8,font:{size:11}}}}}});
+}
+async function loadNER() {
+  const d = await api('/api/ner/top');
+  if (!d || !d.entities.length) { document.getElementById('nerTable').innerHTML = '<p style="padding:12px;color:var(--text2)">No NER data</p>'; return; }
+  let html = '<table><thead><tr><th>Entity</th><th>Type</th><th>Count</th></tr></thead><tbody>';
+  d.entities.slice(0,20).forEach(e => html+=`<tr><td>${e.entity}</td><td>${e.type}</td><td>${e.count}</td></tr>`);
+  html += '</tbody></table>';
+  document.getElementById('nerTable').innerHTML = html;
+}
+async function loadTopics() {
+  const d = await api('/api/topics/trends');
+  if (!d || !d.trends.length) return;
+
+  const topics = [...new Set(d.trends.map(t=>t.topic_id))].slice(0,8);
+  const dates = [...new Set(d.trends.map(t=>t.date))].sort();
+  const topicLabels = {};
+  d.trends.forEach(t => topicLabels[t.topic_id] = t.topic_label);
+  const palette = ['#7c6ff7','#34d399','#f59e0b','#f87171','#22d3ee','#f472b6','#a855f7','#64748b'];
+
+  if(charts.topic) charts.topic.destroy();
+  charts.topic = new Chart(document.getElementById('topicChart'),{type:'line',data:{labels:dates.map(d=>d.slice(5)),datasets:topics.map((tid,i)=>({label:(topicLabels[tid]||'topic_'+tid).slice(0,25),data:dates.map(dt=>{const r=d.trends.find(t=>t.topic_id===tid&&t.date===dt);return r?r.count:0}),borderColor:palette[i%palette.length],tension:.3,pointRadius:1,borderWidth:2}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{usePointStyle:true,padding:10,font:{size:10}}}}}});
+}
+buildEmoCoins();
+
+async function askInsight() {
+  const query = document.getElementById('insightQuery').value.trim();
+  if (!query) return;
+  const coin = document.getElementById('insightCoin').value;
+  const btn = document.getElementById('insightBtn');
+  const resp = document.getElementById('insightResponse');
+
+  btn.disabled = true; btn.textContent = 'Thinking...';
+  resp.className = 'insight-response loading'; resp.textContent = 'Analyzing data with Llama 3...';
+
+  try {
+    const r = await fetch(API + '/api/insight', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({query, coin})
+    });
+    const d = await r.json();
+    resp.className = 'insight-response';
+    resp.textContent = d.insight || d.error || 'No response';
+  } catch(e) {
+    resp.className = 'insight-response';
+    resp.textContent = 'Error: Could not connect to backend. Is Flask running?';
+  }
+  btn.disabled = false; btn.textContent = 'Ask Llama 3';
+}
+function quickAsk(q) {
+  document.getElementById('insightQuery').value = q;
+  askInsight();
+}
+
+async function triggerRefresh() {
+  const btn = document.getElementById('refreshBtn');
+  const status = document.getElementById('refreshStatus');
+  btn.classList.add('running');
+  document.getElementById('refreshIcon').innerHTML = '<span class="spinner"></span>';
+  status.textContent = 'Starting pipeline...';
+
+  await fetch(API + '/api/refresh', {method:'POST'});
+  pollRefresh();
+}
+async function pollRefresh() {
+  const status = document.getElementById('refreshStatus');
+  const btn = document.getElementById('refreshBtn');
+
+  const d = await api('/api/refresh/status');
+  if (d && d.running) {
+    status.textContent = d.message || 'Running...';
+    setTimeout(pollRefresh, 3000);
+  } else {
+    btn.classList.remove('running');
+    document.getElementById('refreshIcon').textContent = '↻';
+    status.textContent = d?.last_run ? `Last: ${d.last_run}` : 'Complete!';
+    loadOverview(); loadSentiment(); loadResearch(); loadEmotions(); loadNER(); loadTopics();
+  }
+}
+
+loadOverview();
+loadSentiment();
+loadResearch();
+loadEmotions();
+loadNER();
+loadTopics();
+</script>
+</body>
+</html>
