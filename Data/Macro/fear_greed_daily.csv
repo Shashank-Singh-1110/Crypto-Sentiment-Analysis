@@ -1,0 +1,193 @@
+date,value,classification
+2025-10-07,70,Greed
+2025-10-08,60,Greed
+2025-10-09,70,Greed
+2025-10-10,64,Greed
+2025-10-11,27,Fear
+2025-10-12,24,Extreme Fear
+2025-10-13,38,Fear
+2025-10-14,38,Fear
+2025-10-15,34,Fear
+2025-10-16,28,Fear
+2025-10-17,22,Extreme Fear
+2025-10-18,23,Extreme Fear
+2025-10-19,29,Fear
+2025-10-20,29,Fear
+2025-10-21,34,Fear
+2025-10-22,25,Extreme Fear
+2025-10-23,27,Fear
+2025-10-24,30,Fear
+2025-10-25,37,Fear
+2025-10-26,40,Fear
+2025-10-27,51,Neutral
+2025-10-28,50,Neutral
+2025-10-29,51,Neutral
+2025-10-30,34,Fear
+2025-10-31,29,Fear
+2025-11-01,33,Fear
+2025-11-02,37,Fear
+2025-11-03,42,Fear
+2025-11-04,21,Extreme Fear
+2025-11-05,23,Extreme Fear
+2025-11-06,27,Fear
+2025-11-07,24,Extreme Fear
+2025-11-08,20,Extreme Fear
+2025-11-09,22,Extreme Fear
+2025-11-10,29,Fear
+2025-11-11,26,Fear
+2025-11-12,24,Extreme Fear
+2025-11-13,15,Extreme Fear
+2025-11-14,16,Extreme Fear
+2025-11-15,10,Extreme Fear
+2025-11-16,10,Extreme Fear
+2025-11-17,14,Extreme Fear
+2025-11-18,11,Extreme Fear
+2025-11-19,15,Extreme Fear
+2025-11-20,11,Extreme Fear
+2025-11-21,14,Extreme Fear
+2025-11-22,11,Extreme Fear
+2025-11-23,13,Extreme Fear
+2025-11-24,19,Extreme Fear
+2025-11-25,20,Extreme Fear
+2025-11-26,15,Extreme Fear
+2025-11-27,22,Extreme Fear
+2025-11-28,25,Extreme Fear
+2025-11-29,28,Fear
+2025-11-30,28,Fear
+2025-12-01,24,Extreme Fear
+2025-12-02,23,Extreme Fear
+2025-12-03,28,Fear
+2025-12-04,26,Fear
+2025-12-05,28,Fear
+2025-12-06,23,Extreme Fear
+2025-12-07,20,Extreme Fear
+2025-12-08,20,Extreme Fear
+2025-12-09,22,Extreme Fear
+2025-12-10,26,Fear
+2025-12-11,29,Fear
+2025-12-12,29,Fear
+2025-12-13,23,Extreme Fear
+2025-12-14,21,Extreme Fear
+2025-12-15,16,Extreme Fear
+2025-12-16,11,Extreme Fear
+2025-12-17,16,Extreme Fear
+2025-12-18,17,Extreme Fear
+2025-12-19,16,Extreme Fear
+2025-12-20,20,Extreme Fear
+2025-12-21,20,Extreme Fear
+2025-12-22,25,Extreme Fear
+2025-12-23,24,Extreme Fear
+2025-12-24,24,Extreme Fear
+2025-12-25,23,Extreme Fear
+2025-12-26,20,Extreme Fear
+2025-12-27,23,Extreme Fear
+2025-12-28,24,Extreme Fear
+2025-12-29,24,Extreme Fear
+2025-12-30,23,Extreme Fear
+2025-12-31,21,Extreme Fear
+2026-01-01,20,Extreme Fear
+2026-01-02,28,Fear
+2026-01-03,29,Fear
+2026-01-04,25,Extreme Fear
+2026-01-05,26,Fear
+2026-01-06,44,Fear
+2026-01-07,42,Fear
+2026-01-08,28,Fear
+2026-01-09,27,Fear
+2026-01-10,25,Extreme Fear
+2026-01-11,29,Fear
+2026-01-12,27,Fear
+2026-01-13,26,Fear
+2026-01-14,48,Neutral
+2026-01-15,61,Greed
+2026-01-16,49,Neutral
+2026-01-17,50,Neutral
+2026-01-18,49,Neutral
+2026-01-19,44,Fear
+2026-01-20,32,Fear
+2026-01-21,24,Extreme Fear
+2026-01-22,20,Extreme Fear
+2026-01-23,24,Extreme Fear
+2026-01-24,25,Extreme Fear
+2026-01-25,25,Extreme Fear
+2026-01-26,20,Extreme Fear
+2026-01-27,29,Fear
+2026-01-28,29,Fear
+2026-01-29,26,Fear
+2026-01-30,16,Extreme Fear
+2026-01-31,20,Extreme Fear
+2026-02-01,14,Extreme Fear
+2026-02-02,14,Extreme Fear
+2026-02-03,17,Extreme Fear
+2026-02-04,14,Extreme Fear
+2026-02-05,12,Extreme Fear
+2026-02-06,9,Extreme Fear
+2026-02-07,6,Extreme Fear
+2026-02-08,7,Extreme Fear
+2026-02-09,14,Extreme Fear
+2026-02-10,9,Extreme Fear
+2026-02-11,11,Extreme Fear
+2026-02-12,5,Extreme Fear
+2026-02-13,9,Extreme Fear
+2026-02-14,9,Extreme Fear
+2026-02-15,8,Extreme Fear
+2026-02-16,12,Extreme Fear
+2026-02-17,10,Extreme Fear
+2026-02-18,8,Extreme Fear
+2026-02-19,9,Extreme Fear
+2026-02-20,7,Extreme Fear
+2026-02-21,8,Extreme Fear
+2026-02-22,9,Extreme Fear
+2026-02-23,5,Extreme Fear
+2026-02-24,8,Extreme Fear
+2026-02-25,11,Extreme Fear
+2026-02-26,11,Extreme Fear
+2026-02-27,13,Extreme Fear
+2026-02-28,11,Extreme Fear
+2026-03-01,14,Extreme Fear
+2026-03-02,10,Extreme Fear
+2026-03-03,14,Extreme Fear
+2026-03-04,10,Extreme Fear
+2026-03-05,22,Extreme Fear
+2026-03-06,18,Extreme Fear
+2026-03-07,12,Extreme Fear
+2026-03-08,12,Extreme Fear
+2026-03-09,8,Extreme Fear
+2026-03-10,13,Extreme Fear
+2026-03-11,15,Extreme Fear
+2026-03-12,18,Extreme Fear
+2026-03-13,15,Extreme Fear
+2026-03-14,16,Extreme Fear
+2026-03-15,15,Extreme Fear
+2026-03-16,23,Extreme Fear
+2026-03-17,28,Fear
+2026-03-18,26,Fear
+2026-03-19,23,Extreme Fear
+2026-03-20,11,Extreme Fear
+2026-03-21,12,Extreme Fear
+2026-03-22,10,Extreme Fear
+2026-03-23,8,Extreme Fear
+2026-03-24,11,Extreme Fear
+2026-03-25,14,Extreme Fear
+2026-03-26,10,Extreme Fear
+2026-03-27,13,Extreme Fear
+2026-03-28,12,Extreme Fear
+2026-03-29,9,Extreme Fear
+2026-03-30,8,Extreme Fear
+2026-03-31,11,Extreme Fear
+2026-04-01,8,Extreme Fear
+2026-04-02,12,Extreme Fear
+2026-04-03,9,Extreme Fear
+2026-04-04,11,Extreme Fear
+2026-04-05,12,Extreme Fear
+2026-04-06,13,Extreme Fear
+2026-04-07,11,Extreme Fear
+2026-04-08,17,Extreme Fear
+2026-04-09,14,Extreme Fear
+2026-04-10,16,Extreme Fear
+2026-04-11,15,Extreme Fear
+2026-04-12,16,Extreme Fear
+2026-04-13,12,Extreme Fear
+2026-04-14,21,Extreme Fear
+2026-04-15,23,Extreme Fear
+2026-04-16,23,Extreme Fear
